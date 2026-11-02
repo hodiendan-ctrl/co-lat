@@ -158,10 +158,10 @@ body{
   transition:transform .25s,box-shadow .25s;
 }
 .player.active{transform:translateY(-4px);box-shadow:0 0 0 3px var(--pc),0 7px 0 var(--mint-dark),0 16px 28px rgba(40,60,30,.28)}
-.p-head{display:flex;align-items:center;gap:8px;min-width:0}
+.p-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
 .pen{width:66px;height:17px;flex:none;transform:rotate(-6deg);transition:transform .3s;filter:drop-shadow(0 2px 1px rgba(0,0,0,.25))}
 .player.active .pen{transform:rotate(-22deg) translate(-2px,-5px)}
-.p-name{font-family:var(--display);font-weight:800;font-size:17px;line-height:1.1;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p-name{font-family:var(--display);font-weight:800;font-size:18px;line-height:1.15;margin-top:6px;min-width:0;overflow-wrap:anywhere;word-break:break-word}
 .p-score{font-size:13px;color:var(--ink-muted);white-space:nowrap;font-variant-numeric:tabular-nums}
 .p-score b{font-family:var(--display);font-size:20px;color:var(--ink);font-weight:800}
 .chips{
@@ -176,15 +176,15 @@ body{
 .chip.still{animation:none}
 @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 .turn-badge{
-  position:absolute;top:-12px;right:12px;display:none;background:var(--pc);color:#fff;font-size:11px;font-weight:700;letter-spacing:.06em;
+  position:absolute;top:-13px;left:50%;transform:translateX(-50%);white-space:nowrap;display:none;background:var(--pc);color:#fff;font-size:11px;font-weight:700;letter-spacing:.06em;
   text-transform:uppercase;padding:3px 10px;border-radius:999px;box-shadow:0 2px 4px rgba(0,0,0,.25);
 }
 .player.active .turn-badge{display:block}
 @media (max-width:640px){
   .players{grid-template-columns:repeat(2,minmax(0,1fr))}
   .player{padding:9px 10px 10px}
-  .pen{width:36px;height:10px}
-  .p-name{font-size:15px}
+  .pen{width:44px;height:12px}
+  .p-name{font-size:16px;margin-top:4px}
   .p-score{font-size:12px}
   .p-score b{font-size:17px}
   .chips{min-height:36px;padding-left:14px}
@@ -630,7 +630,7 @@ function buildPlayers() {
     const el = document.createElement('div');
     el.className = 'player';
     el.style.setProperty('--pc', p.color);
-    el.innerHTML = '<div class="p-head">' + penSVG(p.color) + '<span class="p-name"></span><span class="p-score"><b>0</b> cặp</span></div><div class="chips"></div><span class="turn-badge">Đến lượt</span>';
+    el.innerHTML = '<div class="p-top">' + penSVG(p.color) + '<span class="p-score"><b>0</b> cặp</span></div><div class="p-name"></div><div class="chips"></div><span class="turn-badge">Đến lượt</span>';
     el.querySelector('.p-name').textContent = p.name;
     el.querySelector('.p-name').title = p.name;
     wrap.appendChild(el);
