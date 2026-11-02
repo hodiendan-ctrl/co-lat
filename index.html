@@ -155,9 +155,20 @@ body{
 .player{
   position:relative;min-width:0;background:linear-gradient(180deg,var(--mint-hi),var(--mint));border-radius:20px;
   padding:10px 12px 12px;color:var(--ink);box-shadow:0 5px 0 var(--mint-dark),0 10px 18px rgba(40,60,30,.18);
-  transition:transform .25s,box-shadow .25s;
+  transition:transform .25s,box-shadow .25s,opacity .25s,background .25s;opacity:.82;
 }
-.player.active{transform:translateY(-4px);box-shadow:0 0 0 3px var(--pc),0 7px 0 var(--mint-dark),0 16px 28px rgba(40,60,30,.28)}
+/* the player whose turn it is lights up: near-white card, ring in their colour, pulsing warm glow */
+.player.active{
+  opacity:1;z-index:1;transform:translateY(-4px) scale(1.03);
+  background:linear-gradient(180deg,#f7fff1,#ddf6d0);
+  box-shadow:0 0 0 4px var(--pc),0 0 0 7px rgba(255,255,255,.85),0 0 30px 10px rgba(255,236,140,.8),0 7px 0 var(--mint-dark),0 18px 30px rgba(40,60,30,.3);
+  animation:glow 1.6s ease-in-out infinite;
+}
+.player.active .p-name{color:var(--red)}
+@keyframes glow{
+  0%,100%{box-shadow:0 0 0 4px var(--pc),0 0 0 7px rgba(255,255,255,.85),0 0 22px 6px rgba(255,236,140,.6),0 7px 0 var(--mint-dark),0 18px 30px rgba(40,60,30,.3)}
+  50%{box-shadow:0 0 0 4px var(--pc),0 0 0 7px rgba(255,255,255,.95),0 0 42px 14px rgba(255,236,140,.95),0 7px 0 var(--mint-dark),0 18px 30px rgba(40,60,30,.3)}
+}
 .p-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
 .pen{width:66px;height:17px;flex:none;transform:rotate(-6deg);transition:transform .3s;filter:drop-shadow(0 2px 1px rgba(0,0,0,.25))}
 .player.active .pen{transform:rotate(-22deg) translate(-2px,-5px)}
@@ -205,7 +216,7 @@ body{
 .hex-side{position:absolute;inset:16px 0 -16px 0;background:linear-gradient(180deg,#86b981,#5f8f5c 55%,#4c7a4a)}
 .hex-field{position:relative;z-index:1;padding:var(--m,24px) 0;background:radial-gradient(ellipse at 50% 42%,#a6d69c 0 50%,#8cc184 100%)}
 .hex-rim{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
-.row{display:flex;justify-content:center;gap:var(--gap,6px)}
+.row{display:flex;justify-content:center;gap:var(--gap,6px);position:relative;left:calc(var(--shift,0) * (var(--d,48px) + var(--gap,6px)))}
 .row+.row{margin-top:calc(var(--d,48px) * -0.13 + var(--gap,6px) * 0.87)}
 .cell{position:relative;width:var(--d,48px);height:var(--d,48px);flex:none;border-radius:50%;
   background:radial-gradient(circle at 50% 38%,var(--hole) 0 58%,var(--hole-deep) 100%);
@@ -255,7 +266,7 @@ body{
 
 @media (prefers-reduced-motion:reduce){
   .tile-inner,.player,.btn,.block,.pen{transition:none}
-  .chip,.result{animation:none}
+  .chip,.result,.player.active{animation:none}
 }
 </style>
 
@@ -304,8 +315,8 @@ body{
     <div class="field">
       <span class="lbl" id="lbl-size">Bàn cờ</span>
       <div class="seg wide" role="radiogroup" aria-labelledby="lbl-size">
-        <label><input type="radio" name="size" value="s" id="size-s"><span class="block">Nhỏ<small>24 quân · 12 cặp</small></span></label>
-        <label><input type="radio" name="size" value="m" id="size-m"><span class="block">Vừa<small>44 quân · 22 cặp</small></span></label>
+        <label><input type="radio" name="size" value="s" id="size-s"><span class="block">Nhỏ<small>44 quân · 22 cặp</small></span></label>
+        <label><input type="radio" name="size" value="m" id="size-m"><span class="block">Vừa<small>60 quân · 30 cặp</small></span></label>
         <label><input type="radio" name="size" value="l" id="size-l" checked><span class="block">Lớn<small>80 quân · 40 cặp</small></span></label>
       </div>
     </div>
@@ -376,9 +387,9 @@ const SETS = {
 const COLORS = ['#e0453a', '#2f6fd6', '#8a4fc9', '#e8872a'];
 /* honeycomb rows, like the hexagonal board: each row centred, so neighbouring rows interlock */
 const SIZES = {
-  s: { rows: [4, 5, 6, 5, 4], max: 560 },
-  m: { rows: [5, 6, 7, 8, 7, 6, 5], max: 720 },
-  l: { rows: [5, 6, 7, 8, 9, 10, 9, 8, 7, 6, 5], max: 880 }
+  s: { rows: [5, 6, 7, 8, 7, 6, 5], max: 720 },                                                   // 44 quân · 22 cặp
+  m: { rows: [6, 7, 8, 9, 9, 8, 7, 6], shift: [-.25, -.25, -.25, -.25, .25, .25, .25, .25], max: 800 }, // 60 quân · 30 cặp (two middle rows staggered)
+  l: { rows: [5, 6, 7, 8, 9, 10, 9, 8, 7, 6, 5], max: 880 }                                       // 80 quân · 40 cặp
 };
 const MIN_DISC = 28;        // below this the board scrolls sideways instead of shrinking further
 const LS_SET = 'colat.settings', LS_GAME = 'colat.game';
@@ -497,7 +508,7 @@ function newGame(startAt) {
     players.push({ name: settings.names[i] || ('Người chơi ' + (i + 1)), color: COLORS[i], pairs: [], flips: 0 });
   }
   const start = ((startAt || 0) % players.length + players.length) % players.length;
-  S = { phase: 'play', rows: sz.rows.slice(), max: sz.max, tiles, players, cur: start, start, first: -1, lock: false, turns: 1, cont: !!settings.cont, msg: '' };
+  S = { phase: 'play', rows: sz.rows.slice(), shift: sz.shift ? sz.shift.slice() : null, max: sz.max, tiles, players, cur: start, start, first: -1, lock: false, turns: 1, cont: !!settings.cont, msg: '' };
   renderGame();
   setStatus('Đến lượt ' + cur().name + '. Lật quân thứ nhất.');
   save();
@@ -512,6 +523,7 @@ function normalize(g) {
   g.start = Math.min(Math.max(0, g.start | 0), g.players.length - 1);
   g.players.forEach((p, i) => { p.pairs = p.pairs || []; p.flips = p.flips || 0; p.color = COLORS[i]; });
   if (!g.max) g.max = 880;
+  if (g.shift && (!Array.isArray(g.shift) || g.shift.length !== g.rows.length)) g.shift = null;
   return g;
 }
 
@@ -525,6 +537,7 @@ function renderGame() {
   let i = 0;
   S.rows.forEach((n, r) => {
     const row = document.createElement('div'); row.className = 'row';
+    row.style.setProperty('--shift', S.shift ? S.shift[r] : 0);
     for (let c = 0; c < n; c++, i++) {
       const t = S.tiles[i];
       const cell = document.createElement('div'); cell.className = 'cell';
@@ -586,11 +599,13 @@ function sizeBoard() {
   if (avail <= 0) return;
   let W = Math.min(avail, S.max);
   const cols = Math.max.apply(null, S.rows);
+  const sh = S.shift || [];
+  const span = cols + (sh.length ? Math.max.apply(null, sh) - Math.min.apply(null, sh) : 0);   // board width in discs
   const gap = W > 600 ? 8 : (W > 420 ? 6 : 3);
   const rimW = Math.round(Math.max(8, Math.min(22, W * 0.026)));
   const m = rimW + Math.round(Math.max(5, W * 0.012));          // rim plus a little mint between rim and the outer discs
-  let d = Math.floor((W - (cols - 1) * gap - 2 * m) / cols);
-  if (d < MIN_DISC) { d = MIN_DISC; W = cols * d + (cols - 1) * gap + 2 * m; }   // phones + the big board: scroll sideways
+  let d = Math.floor((W - (span - 1) * gap - 2 * m) / span);
+  if (d < MIN_DISC) { d = MIN_DISC; W = Math.ceil(span * d + (span - 1) * gap + 2 * m); }   // phones + the big board: scroll sideways
   hex.style.width = W + 'px';
   face.style.setProperty('--d', d + 'px');
   face.style.setProperty('--gap', gap + 'px');
@@ -600,11 +615,13 @@ function sizeBoard() {
   const rows = $$('#board .row');
   const fr = face.getBoundingClientRect();
   const H = face.offsetHeight, FW = face.offsetWidth;
-  const tl = rows[0].firstElementChild.getBoundingClientRect(), trr = rows[0].lastElementChild.getBoundingClientRect();
-  let widest = rows[0]; rows.forEach(r => { if (r.children.length > widest.children.length) widest = r; });
-  const wr = widest.getBoundingClientRect();
-  const x0 = tl.left - fr.left, x1 = trr.right - fr.left, ym = wr.top - fr.top + wr.height / 2;
-  const pts = [[x0 - m, 0], [x1 + m, 0], [FW, ym], [x1 + m, H], [x0 - m, H], [0, ym]];
+  const ext = rows.map(r => {
+    const a = r.firstElementChild.getBoundingClientRect(), b = r.lastElementChild.getBoundingClientRect();
+    return { l: a.left - fr.left, r: b.right - fr.left, y: a.top - fr.top + a.height / 2 };
+  });
+  let L = ext[0], R = ext[0]; ext.forEach(e => { if (e.l < L.l) L = e; if (e.r > R.r) R = e; });
+  const top = ext[0], bot = ext[ext.length - 1];
+  const pts = [[top.l - m, 0], [top.r + m, 0], [FW, R.y], [bot.r + m, H], [bot.l - m, H], [0, L.y]];
   const rc = Math.max(10, Math.min(26, W * 0.03));
   const inner = insetPolygon(pts, rimW);
   const outerPath = roundedPath(pts, rc), innerPath = roundedPath(inner, Math.max(3, rc - rimW));
