@@ -1,0 +1,905 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<!-- ARTIFACT-BEGIN -->
+<title>Cờ Lật Luyện Trí Nhớ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Be+Vietnam+Pro:wght@400;500;700&display=swap">
+<style>
+/* Layout: a mint-green hexagonal plastic board with a thick rounded rim is the hero, centred on a wooden table.
+   Green question-mark discs sit in round recesses; each player has a mint tray with a yellow pen and a stack of won discs.
+   Setup and messages live on cream pills with red lettering, like the box art. */
+:root{
+  --table:#e9cfa9;          /* light wooden table */
+  --table-deep:#d3ad80;
+  --grain:rgba(120,78,36,.07);
+  --fg:#3a2a1a;             /* text on the table */
+  --muted:#7a6248;
+  --ink:#2b2416;            /* text on cream, mint and yellow (physical surfaces, same in both themes) */
+  --ink-muted:#6f6350;
+  --cream:#fff6dc;
+  --cream-line:#eadcb8;
+  --mint-hi:#c9ebbd;
+  --mint:#a9d8a0;
+  --mint-dark:#86bb80;
+  --mint-edge:#6a9f66;
+  --hole:#4f8a52;
+  --hole-deep:#315c35;
+  --disc-hi:#93dd7c;        /* green disc with the question mark */
+  --disc:#5cb85a;
+  --disc-dark:#3b9440;
+  --yel-hi:#ffe978;
+  --yel:#f5cf3c;
+  --yel-dark:#d9ab1c;
+  --red:#d8322b;
+  --red-hi:#ec4d43;
+  --red-dark:#a9211c;
+  --p1:#e0453a; --p2:#2f6fd6; --p3:#8a4fc9; --p4:#e8872a;
+  --focus:#2f6fd6;
+  --shadow:0 10px 24px rgba(60,40,10,.18);
+  --display:"Baloo 2","Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --table:#3d2b1e; --table-deep:#241910; --grain:rgba(0,0,0,.14); --fg:#f3e8d6; --muted:#c6b39b; --focus:#8fb6ff;
+    --shadow:0 12px 28px rgba(0,0,0,.45); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --table:#3d2b1e; --table-deep:#241910; --grain:rgba(0,0,0,.14); --fg:#f3e8d6; --muted:#c6b39b; --focus:#8fb6ff;
+  --shadow:0 12px 28px rgba(0,0,0,.45); color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{height:100%;background:var(--table)}
+body{
+  margin:0;min-height:calc(100% - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+  font-family:var(--body);font-size:15px;line-height:1.45;color:var(--fg);
+  background:
+    repeating-linear-gradient(90deg,var(--grain) 0 3px,transparent 3px 11px,var(--grain) 11px 13px,transparent 13px 29px),
+    radial-gradient(ellipse 120% 90% at 50% -10%,var(--table) 40%,var(--table-deep) 100%) var(--table);
+  -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
+}
+.app{
+  max-width:1080px;margin:0 auto;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:14px 44px;display:flex;flex-direction:column;gap:18px;
+}
+
+/* ---------- header ---------- */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:inline-flex;align-items:center;gap:10px;background:var(--cream);border-radius:999px;padding:6px 18px 6px 7px;box-shadow:0 4px 0 var(--cream-line),0 8px 16px rgba(60,40,10,.15)}
+.coin{width:36px;height:36px;flex:none;border-radius:50%;display:grid;place-items:center;
+  font-family:var(--display);font-weight:800;font-size:21px;line-height:1;color:var(--cream);text-shadow:0 1px 0 rgba(0,0,0,.3);
+  background:radial-gradient(circle at 35% 30%,var(--disc-hi),var(--disc) 55%,var(--disc-dark));
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.18),0 1px 2px rgba(0,0,0,.25)}
+.brand h1{margin:0;font-family:var(--display);font-weight:800;font-size:clamp(19px,4.2vw,30px);line-height:1;color:var(--red);white-space:nowrap}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ---------- buttons ---------- */
+.btn{
+  appearance:none;border:0;cursor:pointer;font:inherit;font-weight:700;border-radius:999px;padding:10px 18px;color:var(--ink);
+  background:linear-gradient(180deg,var(--yel-hi),var(--yel));
+  box-shadow:0 4px 0 var(--yel-dark),0 6px 14px rgba(60,40,10,.18);
+  transition:transform .08s,box-shadow .08s;white-space:nowrap;
+}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--yel-dark),0 2px 6px rgba(60,40,10,.18)}
+.btn.small{padding:8px 14px;font-size:14px}
+.btn.icon{width:44px;height:44px;padding:0;display:grid;place-items:center;font-size:20px;line-height:1}
+.btn.primary{
+  background:linear-gradient(180deg,var(--red-hi),var(--red));color:var(--cream);
+  box-shadow:0 4px 0 var(--red-dark),0 8px 18px rgba(140,40,20,.3);
+  font-family:var(--display);font-size:20px;font-weight:800;padding:12px 30px;
+}
+.btn.primary:active{box-shadow:0 1px 0 var(--red-dark),0 3px 8px rgba(140,40,20,.3)}
+.btn.quiet{background:transparent;box-shadow:none;color:var(--fg);padding:8px 10px;text-decoration:underline;text-underline-offset:3px;font-weight:600}
+.btn.quiet:active{transform:none}
+.sheet .btn.quiet,.confirm .btn.quiet,.result .btn.quiet{color:var(--ink)}
+.btn:focus-visible,.tile:focus-visible,.check input:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+
+/* ---------- setup sheet (cream card) ---------- */
+.sheet{
+  background:var(--cream);color:var(--ink);border-radius:26px;
+  padding:26px clamp(16px,3.5vw,32px) 28px;box-shadow:0 5px 0 var(--cream-line),var(--shadow);max-width:680px;width:100%;margin:0 auto;
+  display:flex;flex-direction:column;gap:22px;
+}
+.sheet h2{margin:0 0 6px;font-family:var(--display);font-size:28px;font-weight:800;line-height:1.1;color:var(--red);text-wrap:balance}
+.rules{margin:0;color:var(--ink-muted);font-size:14px;line-height:1.55;max-width:60ch}
+.preview{
+  --d:58px;--gap:6px;display:flex;gap:var(--gap);justify-content:center;width:max-content;max-width:100%;margin:0 auto;padding:10px 16px;
+  background:linear-gradient(180deg,var(--mint-hi),var(--mint));border-radius:999px;box-shadow:0 6px 0 var(--mint-dark),0 12px 20px rgba(40,60,30,.2);
+}
+.field{display:flex;flex-direction:column;gap:10px}
+.lbl{font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted)}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg label{position:relative;flex:1 1 0;min-width:96px;display:block}
+.seg.wide label{min-width:140px}
+.seg input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
+.block{
+  display:block;text-align:center;cursor:pointer;border-radius:16px;padding:10px 10px;user-select:none;
+  background:linear-gradient(180deg,var(--mint-hi),var(--mint));box-shadow:0 4px 0 var(--mint-dark);
+  color:var(--ink);font-weight:700;font-size:15px;line-height:1.2;transition:transform .08s,box-shadow .08s;
+}
+.block small{display:block;font-weight:500;font-size:12px;color:var(--ink-muted);margin-top:3px}
+.block:active{transform:translateY(2px);box-shadow:0 2px 0 var(--mint-dark)}
+.seg input:checked+.block{background:linear-gradient(180deg,var(--yel-hi),var(--yel));box-shadow:0 4px 0 var(--yel-dark),inset 0 0 0 2px rgba(255,255,255,.5)}
+.seg input:focus-visible+.block{outline:3px solid var(--focus);outline-offset:2px}
+.names{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.name-row{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--cream-line);border-radius:999px;padding:5px 10px 5px 6px}
+.name-row:focus-within{border-color:var(--pc)}
+.pawn{
+  flex:none;width:34px;height:34px;border-radius:50%;background:var(--pc);color:#fff;display:grid;place-items:center;
+  font-family:var(--display);font-weight:800;font-size:16px;line-height:1;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.22),0 2px 4px rgba(0,0,0,.22);
+}
+.name-row input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:16px;color:var(--ink);padding:7px 4px;outline:none}
+.name-row input::placeholder{color:#a3957f}
+.check{display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:500;color:var(--ink)}
+.check input{width:20px;height:20px;accent-color:var(--red);margin:0;flex:none}
+.start-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+
+/* ---------- game ---------- */
+.game{display:flex;flex-direction:column;gap:16px;align-items:center}
+.confirm{
+  width:100%;max-width:980px;background:var(--cream);color:var(--ink);border-radius:18px;
+  padding:12px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 4px 0 var(--cream-line),var(--shadow);font-weight:600;
+}
+.confirm-actions{display:flex;gap:8px}
+.players{display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr));gap:14px 12px;width:100%;max-width:980px;padding-top:12px}
+.player{
+  position:relative;min-width:0;background:linear-gradient(180deg,var(--mint-hi),var(--mint));border-radius:20px;
+  padding:10px 12px 12px;color:var(--ink);box-shadow:0 5px 0 var(--mint-dark),0 10px 18px rgba(40,60,30,.18);
+  transition:transform .25s,box-shadow .25s;
+}
+.player.active{transform:translateY(-4px);box-shadow:0 0 0 3px var(--pc),0 7px 0 var(--mint-dark),0 16px 28px rgba(40,60,30,.28)}
+.p-head{display:flex;align-items:center;gap:8px;min-width:0}
+.pen{width:66px;height:17px;flex:none;transform:rotate(-6deg);transition:transform .3s;filter:drop-shadow(0 2px 1px rgba(0,0,0,.25))}
+.player.active .pen{transform:rotate(-22deg) translate(-2px,-5px)}
+.p-name{font-family:var(--display);font-weight:800;font-size:17px;line-height:1.1;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p-score{font-size:13px;color:var(--ink-muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.p-score b{font-family:var(--display);font-size:20px;color:var(--ink);font-weight:800}
+.chips{
+  display:flex;flex-wrap:wrap;align-items:center;row-gap:4px;margin-top:9px;min-height:40px;padding:5px 10px 5px 16px;
+  background:radial-gradient(circle at 50% 30%,var(--hole) 0 70%,var(--hole-deep) 100%);border-radius:999px;box-shadow:inset 0 3px 6px rgba(0,0,0,.4);
+}
+.chip{
+  width:30px;height:30px;flex:none;margin-left:-10px;border-radius:50%;display:grid;place-items:center;font-size:16px;line-height:1;
+  background:radial-gradient(circle,var(--cream) 0 60%,var(--disc) 61% 100%);
+  box-shadow:0 1px 2px rgba(0,0,0,.4),inset 0 -1px 0 rgba(0,0,0,.1);animation:pop .35s ease-out;
+}
+.chip.still{animation:none}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.turn-badge{
+  position:absolute;top:-12px;right:12px;display:none;background:var(--pc);color:#fff;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;padding:3px 10px;border-radius:999px;box-shadow:0 2px 4px rgba(0,0,0,.25);
+}
+.player.active .turn-badge{display:block}
+@media (max-width:640px){
+  .players{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .player{padding:9px 10px 10px}
+  .pen{width:36px;height:10px}
+  .p-name{font-size:15px}
+  .p-score{font-size:12px}
+  .p-score b{font-size:17px}
+  .chips{min-height:36px;padding-left:14px}
+  .chip{width:26px;height:26px;font-size:14px}
+}
+.status{
+  width:100%;max-width:980px;background:var(--cream);color:var(--red);border-radius:999px;
+  padding:10px 20px;font-family:var(--display);font-weight:800;font-size:17px;line-height:1.2;
+  box-shadow:0 4px 0 var(--cream-line),0 6px 14px rgba(60,40,10,.12);min-height:48px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.status::before{content:"";width:12px;height:12px;flex:none;border-radius:50%;background:var(--pc,var(--yel));box-shadow:inset 0 -2px 0 rgba(0,0,0,.2)}
+#status-text{flex:1 1 160px;min-width:0}
+.status .remain{margin-left:auto;font-family:var(--body);font-size:13px;font-weight:600;color:var(--ink-muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* ---------- the board: thick rounded rim, recessed field, round holes with a groove around each disc ---------- */
+.board-wrap{width:100%;overflow-x:auto;overflow-y:hidden;padding:4px 0 40px;scrollbar-width:thin}
+.hex{position:relative;margin:0 auto;width:min(100%,var(--bmax,860px));filter:drop-shadow(0 20px 16px rgba(30,50,20,.38))}
+.hex-side{position:absolute;inset:16px 0 -16px 0;background:linear-gradient(180deg,#86b981,#5f8f5c 55%,#4c7a4a)}
+.hex-field{position:relative;z-index:1;padding:var(--m,24px) 0;background:radial-gradient(ellipse at 50% 42%,#a6d69c 0 50%,#8cc184 100%)}
+.hex-rim{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
+.row{display:flex;justify-content:center;gap:var(--gap,6px)}
+.row+.row{margin-top:calc(var(--d,48px) * -0.13 + var(--gap,6px) * 0.87)}
+.cell{position:relative;width:var(--d,48px);height:var(--d,48px);flex:none;border-radius:50%;
+  background:radial-gradient(circle at 50% 38%,var(--hole) 0 58%,var(--hole-deep) 100%);
+  box-shadow:inset 0 3px 6px rgba(0,0,0,.55),inset 0 -2px 2px rgba(255,255,255,.14),0 1px 0 rgba(255,255,255,.25)}
+.tile{position:absolute;inset:8%;appearance:none;border:0;padding:0;margin:0;background:none;cursor:pointer;perspective:600px;font:inherit;border-radius:50%;color:inherit}
+.tile-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,.2,.2,1);transform:rotate(var(--r,0deg))}
+.tile.up .tile-inner{transform:rotateY(180deg) rotate(var(--r,0deg))}
+@media (hover:hover){.tile:not(.up):hover .tile-inner{transform:translateY(-3px) rotate(var(--r,0deg))}}
+.face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:grid;place-items:center}
+.face.back{
+  background:radial-gradient(circle at 35% 28%,var(--disc-hi),var(--disc) 52%,var(--disc-dark) 100%);
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.35),0 3px 4px rgba(0,0,0,.45);
+}
+.face.back::after{content:"?";font-family:var(--display);font-weight:800;font-size:calc(var(--d,48px) * .46);line-height:1;color:var(--cream);text-shadow:0 2px 0 rgba(0,0,0,.28)}
+.face.front{transform:rotateY(180deg);background:radial-gradient(circle,var(--cream) 0 63%,var(--disc) 64% 100%);box-shadow:inset 0 -2px 0 rgba(0,0,0,.12),0 3px 4px rgba(0,0,0,.45)}
+.pic{font-size:calc(var(--d,48px) * .44);line-height:1;filter:drop-shadow(0 1px 0 rgba(0,0,0,.08))}
+.tile.taken{visibility:hidden;pointer-events:none}
+.ghost{
+  position:fixed;z-index:50;pointer-events:none;border-radius:50%;display:grid;place-items:center;line-height:1;
+  background:radial-gradient(circle,var(--cream) 0 63%,var(--disc) 64% 100%);
+  box-shadow:0 8px 16px rgba(0,0,0,.3);font-size:calc(var(--gs,60px) * .5);will-change:transform;
+}
+
+/* ---------- result ---------- */
+.overlay{
+  position:fixed;inset:0;z-index:40;background:rgba(40,30,15,.62);display:grid;place-items:center;overflow:auto;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:max(16px,env(safe-area-inset-top,0px));padding-bottom:max(16px,env(safe-area-inset-bottom,0px));
+}
+.result{
+  background:var(--cream);color:var(--ink);border-radius:26px;padding:26px clamp(18px,4vw,34px) 24px;
+  max-width:520px;width:100%;box-shadow:0 5px 0 var(--cream-line),0 24px 60px rgba(0,0,0,.4);text-align:center;display:flex;flex-direction:column;gap:16px;animation:rise .4s ease-out;
+}
+@keyframes rise{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.result h2{margin:0;font-family:var(--display);font-size:clamp(26px,6vw,36px);font-weight:800;line-height:1.1;color:var(--red);text-wrap:balance}
+.result .sub{margin:0;color:var(--ink-muted)}
+.rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;text-align:left}
+.rank li{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--cream-line);border-radius:999px;padding:7px 14px 7px 8px;min-width:0}
+.rank li.win{border-color:var(--yel-dark);background:#fff9e3}
+.rank .medal{font-size:22px;width:30px;text-align:center;flex:none}
+.rank .pawn{width:28px;height:28px;font-size:14px}
+.rank .r-name{font-family:var(--display);font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank .r-score{font-variant-numeric:tabular-nums;color:var(--ink-muted);white-space:nowrap}
+.rank .r-score b{font-family:var(--display);font-size:20px;color:var(--ink)}
+.result .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+#confetti{position:fixed;inset:0;z-index:45;pointer-events:none;width:100%;height:100%}
+
+@media (prefers-reduced-motion:reduce){
+  .tile-inner,.player,.btn,.block,.pen{transition:none}
+  .chip,.result{animation:none}
+}
+</style>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand"><span class="coin" aria-hidden="true">?</span><h1>Cờ Lật Luyện Trí Nhớ</h1></div>
+    <div class="top-actions">
+      <button type="button" class="btn small" id="btn-restart" hidden>Ván mới</button>
+      <button type="button" class="btn small" id="btn-setup" hidden>Đổi người chơi</button>
+      <button type="button" class="btn icon" id="btn-sound" aria-label="Tắt âm thanh" title="Âm thanh">🔊</button>
+    </div>
+  </header>
+
+  <section class="sheet" id="setup" aria-labelledby="setup-title">
+    <div class="preview" aria-hidden="true">
+      <div class="cell"><div class="tile up"><span class="tile-inner"><span class="face back"></span><span class="face front"><span class="pic">🍉</span></span></span></div></div>
+      <div class="cell"><div class="tile" style="--r:-2deg"><span class="tile-inner"><span class="face back"></span><span class="face front"></span></span></div></div>
+      <div class="cell"><div class="tile up"><span class="tile-inner"><span class="face back"></span><span class="face front"><span class="pic">🍉</span></span></span></div></div>
+      <div class="cell"><div class="tile" style="--r:3deg"><span class="tile-inner"><span class="face back"></span><span class="face front"></span></span></div></div>
+      <div class="cell"><div class="tile up"><span class="tile-inner"><span class="face back"></span><span class="face front"><span class="pic">🐯</span></span></span></div></div>
+    </div>
+    <div>
+      <h2 id="setup-title">Chuẩn bị bàn cờ</h2>
+      <p class="rules">Mỗi lượt dùng bút lật 2 quân. Hai quân giống hình thì được ăn cả hai; khác hình thì úp lại, đến lượt người kế. Hết bàn, ai ăn nhiều cặp nhất thắng.</p>
+    </div>
+
+    <div class="field">
+      <span class="lbl" id="lbl-count">Số người chơi</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lbl-count">
+        <label><input type="radio" name="count" value="2" id="count-2" checked><span class="block">2 người</span></label>
+        <label><input type="radio" name="count" value="3" id="count-3"><span class="block">3 người</span></label>
+        <label><input type="radio" name="count" value="4" id="count-4"><span class="block">4 người</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="lbl">Tên người chơi</span>
+      <div class="names" id="names">
+        <label class="name-row" id="name-row-1" style="--pc:var(--p1)"><span class="pawn">1</span><input id="name-1" type="text" maxlength="16" placeholder="Người chơi 1" autocomplete="off" enterkeyhint="next"></label>
+        <label class="name-row" id="name-row-2" style="--pc:var(--p2)"><span class="pawn">2</span><input id="name-2" type="text" maxlength="16" placeholder="Người chơi 2" autocomplete="off" enterkeyhint="next"></label>
+        <label class="name-row" id="name-row-3" style="--pc:var(--p3)" hidden><span class="pawn">3</span><input id="name-3" type="text" maxlength="16" placeholder="Người chơi 3" autocomplete="off" enterkeyhint="next"></label>
+        <label class="name-row" id="name-row-4" style="--pc:var(--p4)" hidden><span class="pawn">4</span><input id="name-4" type="text" maxlength="16" placeholder="Người chơi 4" autocomplete="off" enterkeyhint="done"></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="lbl" id="lbl-size">Bàn cờ</span>
+      <div class="seg wide" role="radiogroup" aria-labelledby="lbl-size">
+        <label><input type="radio" name="size" value="s" id="size-s"><span class="block">Nhỏ<small>24 quân · 12 cặp</small></span></label>
+        <label><input type="radio" name="size" value="m" id="size-m"><span class="block">Vừa<small>44 quân · 22 cặp</small></span></label>
+        <label><input type="radio" name="size" value="l" id="size-l" checked><span class="block">Lớn<small>80 quân · 40 cặp</small></span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="lbl" id="lbl-set">Bộ hình</span>
+      <div class="seg wide" role="radiogroup" aria-labelledby="lbl-set">
+        <label><input type="radio" name="set" value="mix" id="set-mix" checked><span class="block">🐰 Thú &amp; trái cây</span></label>
+        <label><input type="radio" name="set" value="animals" id="set-animals"><span class="block">🐶 Con vật</span></label>
+        <label><input type="radio" name="set" value="fruits" id="set-fruits"><span class="block">🍎 Trái cây &amp; đồ ăn</span></label>
+        <label><input type="radio" name="set" value="objects" id="set-objects"><span class="block">🚗 Đồ vật</span></label>
+      </div>
+    </div>
+
+    <label class="check"><input type="checkbox" id="rule-cont" checked> Ăn được cặp thì được lật tiếp</label>
+
+    <div class="start-row">
+      <button type="button" class="btn primary" id="btn-start">Bắt đầu chơi</button>
+      <button type="button" class="btn quiet" id="btn-continue" hidden>Tiếp tục ván dở</button>
+    </div>
+  </section>
+
+  <section class="game" id="game" hidden aria-label="Bàn cờ">
+    <div class="confirm" id="confirm" hidden role="alertdialog" aria-live="assertive">
+      <span id="confirm-text"></span>
+      <div class="confirm-actions">
+        <button type="button" class="btn small" id="confirm-yes">Đồng ý</button>
+        <button type="button" class="btn quiet small" id="confirm-no">Thôi</button>
+      </div>
+    </div>
+    <div class="players" id="players"></div>
+    <div class="status" id="status" aria-live="polite"><span id="status-text"></span><span class="remain" id="remain"></span></div>
+    <div class="board-wrap" id="board-wrap">
+      <div class="hex" id="hex">
+        <div class="hex-side" id="hex-side" aria-hidden="true"></div>
+        <div class="hex-field" id="board"></div>
+        <svg class="hex-rim" id="rim" aria-hidden="true"></svg>
+      </div>
+    </div>
+  </section>
+
+  <div class="overlay" id="result" hidden>
+    <div class="result" role="dialog" aria-labelledby="result-title" aria-modal="true">
+      <h2 id="result-title"></h2>
+      <p class="sub" id="result-sub"></p>
+      <ol class="rank" id="rank"></ol>
+      <div class="actions">
+        <button type="button" class="btn primary" id="btn-again">Chơi ván nữa</button>
+        <button type="button" class="btn" id="btn-change">Đổi người chơi</button>
+      </div>
+    </div>
+  </div>
+  <canvas id="confetti" hidden aria-hidden="true"></canvas>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+/* each set has at least 40 different pictures, enough for the 80-disc board */
+const SETS = {
+  animals: ['🐶','🐱','🐭','🦇','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🦆','🦉','🦅','🦃','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐢','🐍','🐙','🦀','🐠','🐬','🐳','🦈','🐊','🐘','🦒','🦓','🦘','🐪','🦔'],
+  fruits:  ['🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🥑','🍆','🥕','🌽','🥦','🍄','🌶️','🧅','🥔','🥒','🥬','🧄','🥜','🌰','🍞','🥐','🧀','🍔','🍕','🌭','🍿','🍩','🍪','🎂','🧁','🍫','🍭','🍦','🥛'],
+  objects: ['🚗','🚌','🚑','🚒','🚜','🏎️','🏍️','🚲','🚂','🚁','✈️','🚀','🛸','⛵','🚢','🎈','🎁','⚽','🏀','🏈','🎾','🎱','🎳','🎯','🎲','🧸','🎨','🎸','🥁','🎺','🎹','🎤','📷','📺','☎️','⏰','💡','🔑','🔨','✂️','🔭','🎩','👑','💍','👓','🎓','⌚','☂️','👟']
+};
+const COLORS = ['#e0453a', '#2f6fd6', '#8a4fc9', '#e8872a'];
+/* honeycomb rows, like the hexagonal board: each row centred, so neighbouring rows interlock */
+const SIZES = {
+  s: { rows: [4, 5, 6, 5, 4], max: 560 },
+  m: { rows: [5, 6, 7, 8, 7, 6, 5], max: 720 },
+  l: { rows: [5, 6, 7, 8, 9, 10, 9, 8, 7, 6, 5], max: 880 }
+};
+const MIN_DISC = 28;        // below this the board scrolls sideways instead of shrinking further
+const LS_SET = 'colat.settings', LS_GAME = 'colat.game';
+
+const defaults = () => ({ count: 2, names: ['', '', '', ''], size: 'l', set: 'mix', cont: true, sound: true });
+let settings = defaults();
+let S = null;               // ván đang chơi
+let tileEls = [];
+let pendingConfirm = null;
+
+const store = {
+  get(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+const reduceMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- âm thanh (WebAudio, không cần file) ---------- */
+const Sound = {
+  ctx: null,
+  ensure() {
+    if (!settings.sound) return false;
+    try {
+      if (!this.ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false; this.ctx = new AC(); }
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+      return true;
+    } catch (e) { return false; }
+  },
+  tone(freq, dur, type, at, vol) {
+    if (!this.ensure()) return;
+    try {
+      const c = this.ctx, t = c.currentTime + (at || 0);
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = type || 'sine'; o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol || 0.1, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(c.destination);
+      o.start(t); o.stop(t + dur + 0.03);
+    } catch (e) {}
+  },
+  flip()  { this.tone(620, .07, 'triangle', 0, .06); },
+  match() { this.tone(659, .14, 'sine', 0, .1); this.tone(880, .16, 'sine', .11, .1); this.tone(1319, .3, 'sine', .22, .1); },
+  miss()  { this.tone(240, .16, 'sawtooth', 0, .04); this.tone(190, .24, 'sawtooth', .13, .04); },
+  win()   { [523, 659, 784, 1047, 1319].forEach((f, i) => this.tone(f, .32, 'triangle', i * .12, .1)); }
+};
+
+/* ---------- cây bút vàng của mỗi người chơi ---------- */
+function penSVG(color) {
+  return '<svg class="pen" viewBox="0 0 120 30" aria-hidden="true">' +
+    '<path d="M2 15 L24 4 H104 a11 11 0 0 1 0 22 H24 Z" fill="#f5cf3c"/>' +
+    '<path d="M24 4 H104 a11 11 0 0 1 10 6 H26 Z" fill="#ffe978"/>' +
+    '<path d="M24 26 H104 a11 11 0 0 0 10 -6 H26 Z" fill="#d9ab1c"/>' +
+    '<path d="M2 15 L24 4 V26 Z" fill="#e7bd2a"/>' +
+    '<rect x="44" y="4" width="11" height="22" fill="' + color + '"/>' +
+    '<g fill="#b98d12" opacity=".75"><rect x="66" y="6" width="3" height="18" rx="1.5"/><rect x="73" y="6" width="3" height="18" rx="1.5"/><rect x="80" y="6" width="3" height="18" rx="1.5"/><rect x="87" y="6" width="3" height="18" rx="1.5"/><rect x="94" y="6" width="3" height="18" rx="1.5"/></g>' +
+    '</svg>';
+}
+
+/* ---------- màn hình chuẩn bị ---------- */
+function loadSettings() {
+  const s = store.get(LS_SET);
+  if (s && typeof s === 'object') {
+    settings = Object.assign(defaults(), s);
+    settings.names = (Array.isArray(s.names) ? s.names : []).map(n => String(n || '')).concat(['', '', '', '']).slice(0, 4);
+    if (![2, 3, 4].includes(settings.count)) settings.count = 2;
+    if (!SIZES[settings.size]) settings.size = 'l';
+    if (!SETS[settings.set] && settings.set !== 'mix') settings.set = 'mix';
+  }
+}
+function syncSetupUI() {
+  const c = $('#count-' + settings.count), z = $('#size-' + settings.size), t = $('#set-' + settings.set);
+  if (c) c.checked = true; if (z) z.checked = true; if (t) t.checked = true;
+  $('#rule-cont').checked = !!settings.cont;
+  for (let i = 1; i <= 4; i++) $('#name-' + i).value = settings.names[i - 1] || '';
+  syncNames();
+  updateSoundBtn();
+  const g = store.get(LS_GAME);
+  $('#btn-continue').hidden = !(g && g.phase === 'play' && Array.isArray(g.tiles) && Array.isArray(g.rows));
+}
+function syncNames() { for (let i = 1; i <= 4; i++) $('#name-row-' + i).hidden = i > settings.count; }
+function readSetupUI() {
+  const v = n => { const el = $('input[name="' + n + '"]:checked'); return el ? el.value : null; };
+  settings.count = Number(v('count')) || 2;
+  settings.size = v('size') || 'l';
+  settings.set = v('set') || 'mix';
+  settings.cont = $('#rule-cont').checked;
+  settings.names = [1, 2, 3, 4].map(i => $('#name-' + i).value.trim().slice(0, 16));
+  store.set(LS_SET, settings);
+}
+function updateSoundBtn() {
+  const b = $('#btn-sound');
+  b.textContent = settings.sound ? '🔊' : '🔇';
+  b.setAttribute('aria-label', settings.sound ? 'Tắt âm thanh' : 'Bật âm thanh');
+}
+
+/* ---------- ván cờ ---------- */
+const cur = () => S.players[S.cur];
+const tileEl = i => tileEls[i];
+const allTaken = () => S.tiles.every(t => t.st === 2);
+
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function pool(need) {
+  let p = settings.set === 'mix' ? [].concat(SETS.animals, SETS.fruits) : (SETS[settings.set] || SETS.animals).slice();
+  if (p.length < need) p = [].concat(SETS.animals, SETS.fruits, SETS.objects);   // never run out of pictures
+  return p;
+}
+
+function newGame(startAt) {
+  const sz = SIZES[settings.size] || SIZES.l;
+  const total = sz.rows.reduce((a, b) => a + b, 0);
+  const picks = shuffle(pool(total / 2)).slice(0, total / 2);
+  const tiles = shuffle(picks.concat(picks)).map(e => ({ e, st: 0, r: +(Math.random() * 6 - 3).toFixed(2) }));
+  const players = [];
+  for (let i = 0; i < settings.count; i++) {
+    players.push({ name: settings.names[i] || ('Người chơi ' + (i + 1)), color: COLORS[i], pairs: [], flips: 0 });
+  }
+  const start = ((startAt || 0) % players.length + players.length) % players.length;
+  S = { phase: 'play', rows: sz.rows.slice(), max: sz.max, tiles, players, cur: start, start, first: -1, lock: false, turns: 1, cont: !!settings.cont, msg: '' };
+  renderGame();
+  setStatus('Đến lượt ' + cur().name + '. Lật quân thứ nhất.');
+  save();
+}
+
+function normalize(g) {
+  if (!g || !Array.isArray(g.tiles) || !Array.isArray(g.rows) || !g.players || !g.players.length) throw new Error('bad save');
+  if (g.rows.reduce((a, b) => a + b, 0) !== g.tiles.length) throw new Error('bad save');
+  g.tiles.forEach(t => { if (t.st === 1) t.st = 0; if (typeof t.r !== 'number') t.r = 0; });
+  g.first = -1; g.lock = false;
+  g.cur = Math.min(Math.max(0, g.cur | 0), g.players.length - 1);
+  g.start = Math.min(Math.max(0, g.start | 0), g.players.length - 1);
+  g.players.forEach((p, i) => { p.pairs = p.pairs || []; p.flips = p.flips || 0; p.color = COLORS[i]; });
+  if (!g.max) g.max = 880;
+  return g;
+}
+
+function renderGame() {
+  $('#setup').hidden = true; $('#game').hidden = false; $('#result').hidden = true; $('#confirm').hidden = true;
+  $('#btn-restart').hidden = false; $('#btn-setup').hidden = false;
+  const board = $('#board');
+  board.innerHTML = '';
+  tileEls = [];
+  $('#hex').style.setProperty('--bmax', S.max + 'px');
+  let i = 0;
+  S.rows.forEach((n, r) => {
+    const row = document.createElement('div'); row.className = 'row';
+    for (let c = 0; c < n; c++, i++) {
+      const t = S.tiles[i];
+      const cell = document.createElement('div'); cell.className = 'cell';
+      const b = document.createElement('button'); b.type = 'button';
+      b.className = 'tile' + (t.st === 1 ? ' up' : '') + (t.st === 2 ? ' taken' : '');
+      b.dataset.i = i;
+      b.setAttribute('aria-label', 'Hàng ' + (r + 1) + ', quân ' + (c + 1));
+      b.style.setProperty('--r', t.r + 'deg');
+      b.innerHTML = '<span class="tile-inner"><span class="face back"></span><span class="face front"><span class="pic"></span></span></span>';
+      b.querySelector('.pic').textContent = t.e;
+      cell.appendChild(b); row.appendChild(cell);
+      tileEls.push(b);
+    }
+    board.appendChild(row);
+  });
+  sizeBoard();
+  buildPlayers();
+  updateRemain();
+}
+
+/* ---------- board geometry: disc size from the available width, then a hexagon that hugs the honeycomb ---------- */
+const PATH_OK = (() => { try { return window.CSS && CSS.supports('clip-path', 'path("M0 0 L1 0 L1 1 Z")'); } catch (e) { return false; } })();
+const fmt = v => String(Math.round(v * 10) / 10);
+const towards = (P, Q, r) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], L = Math.hypot(dx, dy) || 1; return [P[0] + dx / L * r, P[1] + dy / L * r]; };
+function roundedPath(pts, rc) {
+  const n = pts.length; let d = '';
+  for (let i = 0; i < n; i++) {
+    const P = pts[i], A = pts[(i - 1 + n) % n], B = pts[(i + 1) % n];
+    const r1 = Math.min(rc, Math.hypot(P[0] - A[0], P[1] - A[1]) / 2), r2 = Math.min(rc, Math.hypot(B[0] - P[0], B[1] - P[1]) / 2);
+    const a = towards(P, A, r1), b = towards(P, B, r2);
+    d += (i ? 'L' : 'M') + fmt(a[0]) + ' ' + fmt(a[1]) + ' Q' + fmt(P[0]) + ' ' + fmt(P[1]) + ' ' + fmt(b[0]) + ' ' + fmt(b[1]) + ' ';
+  }
+  return d + 'Z';
+}
+function insetPolygon(pts, r) {
+  const n = pts.length;
+  const cx = pts.reduce((s, p) => s + p[0], 0) / n, cy = pts.reduce((s, p) => s + p[1], 0) / n;
+  const lines = pts.map((A, i) => {
+    const B = pts[(i + 1) % n];
+    let dx = B[0] - A[0], dy = B[1] - A[1]; const L = Math.hypot(dx, dy) || 1; dx /= L; dy /= L;
+    let nx = -dy, ny = dx;
+    if ((cx - A[0]) * nx + (cy - A[1]) * ny < 0) { nx = -nx; ny = -ny; }
+    return { x: A[0] + nx * r, y: A[1] + ny * r, dx, dy };
+  });
+  return lines.map((l, i) => {
+    const k = lines[(i - 1 + n) % n];
+    const den = k.dx * l.dy - k.dy * l.dx;
+    if (Math.abs(den) < 1e-9) return [l.x, l.y];
+    const t = ((l.x - k.x) * l.dy - (l.y - k.y) * l.dx) / den;
+    return [k.x + k.dx * t, k.y + k.dy * t];
+  });
+}
+const polyCss = pts => 'polygon(' + pts.map(p => fmt(p[0]) + 'px ' + fmt(p[1]) + 'px').join(',') + ')';
+
+function sizeBoard() {
+  if (!S) return;
+  const wrap = $('#board-wrap'), hex = $('#hex'), face = $('#board'), side = $('#hex-side'), rim = $('#rim');
+  const avail = wrap.clientWidth;
+  if (avail <= 0) return;
+  let W = Math.min(avail, S.max);
+  const cols = Math.max.apply(null, S.rows);
+  const gap = W > 600 ? 8 : (W > 420 ? 6 : 3);
+  const rimW = Math.round(Math.max(8, Math.min(22, W * 0.026)));
+  const m = rimW + Math.round(Math.max(5, W * 0.012));          // rim plus a little mint between rim and the outer discs
+  let d = Math.floor((W - (cols - 1) * gap - 2 * m) / cols);
+  if (d < MIN_DISC) { d = MIN_DISC; W = cols * d + (cols - 1) * gap + 2 * m; }   // phones + the big board: scroll sideways
+  hex.style.width = W + 'px';
+  face.style.setProperty('--d', d + 'px');
+  face.style.setProperty('--gap', gap + 'px');
+  face.style.setProperty('--m', m + 'px');
+
+  // measure the rows and wrap a hexagon around them
+  const rows = $$('#board .row');
+  const fr = face.getBoundingClientRect();
+  const H = face.offsetHeight, FW = face.offsetWidth;
+  const tl = rows[0].firstElementChild.getBoundingClientRect(), trr = rows[0].lastElementChild.getBoundingClientRect();
+  let widest = rows[0]; rows.forEach(r => { if (r.children.length > widest.children.length) widest = r; });
+  const wr = widest.getBoundingClientRect();
+  const x0 = tl.left - fr.left, x1 = trr.right - fr.left, ym = wr.top - fr.top + wr.height / 2;
+  const pts = [[x0 - m, 0], [x1 + m, 0], [FW, ym], [x1 + m, H], [x0 - m, H], [0, ym]];
+  const rc = Math.max(10, Math.min(26, W * 0.03));
+  const inner = insetPolygon(pts, rimW);
+  const outerPath = roundedPath(pts, rc), innerPath = roundedPath(inner, Math.max(3, rc - rimW));
+  const clip = PATH_OK ? 'path("' + outerPath + '")' : polyCss(pts);
+  face.style.clipPath = clip; side.style.clipPath = clip;
+
+  rim.setAttribute('viewBox', '0 0 ' + FW + ' ' + H);
+  rim.innerHTML =
+    '<defs>' +
+      '<linearGradient id="rimG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9f1cb"/><stop offset=".45" stop-color="#b7e1aa"/><stop offset="1" stop-color="#94c58a"/></linearGradient>' +
+      '<filter id="rimS" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#163a1a" flood-opacity=".5"/></filter>' +
+    '</defs>' +
+    '<path d="' + outerPath + ' ' + innerPath + '" fill="url(#rimG)" fill-rule="evenodd" filter="url(#rimS)"/>' +
+    '<path d="' + innerPath + '" fill="none" stroke="rgba(10,40,12,.35)" stroke-width="1.5"/>' +
+    '<path d="' + outerPath + '" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.5"/>';
+}
+
+function buildPlayers() {
+  const wrap = $('#players');
+  wrap.innerHTML = '';
+  wrap.style.setProperty('--n', S.players.length);
+  S.players.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'player';
+    el.style.setProperty('--pc', p.color);
+    el.innerHTML = '<div class="p-head">' + penSVG(p.color) + '<span class="p-name"></span><span class="p-score"><b>0</b> cặp</span></div><div class="chips"></div><span class="turn-badge">Đến lượt</span>';
+    el.querySelector('.p-name').textContent = p.name;
+    el.querySelector('.p-name').title = p.name;
+    wrap.appendChild(el);
+  });
+  updatePlayers(true);
+}
+function updatePlayers(initial) {
+  $$('#players .player').forEach((el, i) => {
+    const p = S.players[i];
+    el.classList.toggle('active', S.phase === 'play' && i === S.cur);
+    el.querySelector('.p-score b').textContent = p.pairs.length;
+    const chips = el.querySelector('.chips');
+    while (chips.children.length < p.pairs.length) {
+      const c = document.createElement('span');
+      c.className = 'chip' + (initial ? ' still' : '');
+      c.textContent = p.pairs[chips.children.length];
+      chips.appendChild(c);
+    }
+  });
+}
+function setStatus(text) {
+  S.msg = text;
+  $('#status-text').textContent = text;
+  $('#status').style.setProperty('--pc', S.phase === 'play' ? cur().color : 'var(--yel)');
+  updateRemain();
+}
+function updateRemain() {
+  const left = S.tiles.filter(t => t.st !== 2).length / 2;
+  $('#remain').textContent = left > 0 ? 'Còn ' + left + ' cặp' : 'Hết bàn';
+}
+function save() { if (S && S.phase === 'play') store.set(LS_GAME, S); }
+
+function onTile(i) {
+  if (!S || S.phase !== 'play' || S.lock) return;
+  const t = S.tiles[i];
+  if (!t || t.st !== 0) return;
+  Sound.flip();
+  t.st = 1; tileEl(i).classList.add('up');
+  const p = cur(); p.flips++;
+  if (S.first < 0) { S.first = i; setStatus(p.name + ' lật quân thứ hai…'); save(); return; }
+
+  const a = S.first, b = i;
+  S.first = -1; S.lock = true;
+  const match = S.tiles[a].e === S.tiles[b].e;
+  save();
+  window.setTimeout(() => {
+    if (match) {
+      S.tiles[a].st = S.tiles[b].st = 2;
+      p.pairs.push(S.tiles[a].e);
+      Sound.match();
+      const done = allTaken();
+      setStatus(done ? 'Giống nhau! ' + p.name + ' ăn 2 quân cuối cùng.'
+                     : 'Giống nhau! ' + p.name + ' ăn 2 quân.' + (S.cont ? ' Lật tiếp nào!' : ''));
+      takeTiles([a, b], S.cur, () => {
+        updatePlayers(false);
+        if (done) { endGame(); return; }
+        if (!S.cont) nextPlayer();
+        S.lock = false; save();
+      });
+    } else {
+      Sound.miss();
+      setStatus('Không giống nhau. Úp lại nào…');
+      window.setTimeout(() => {
+        S.tiles[a].st = S.tiles[b].st = 0;
+        tileEl(a).classList.remove('up'); tileEl(b).classList.remove('up');
+        nextPlayer();
+        S.lock = false; save();
+      }, 950);
+    }
+  }, 700);
+}
+
+function takeTiles(idx, pi, cb) {
+  const card = $$('#players .player')[pi];
+  const target = card && card.querySelector('.chips');
+  if (!target || reduceMotion() || typeof Element.prototype.animate !== 'function') {
+    idx.forEach(i => tileEl(i).classList.add('taken'));
+    cb(); return;
+  }
+  let left = idx.length;
+  idx.forEach((i, k) => {
+    const el = tileEl(i);
+    const r = el.getBoundingClientRect(), tr = target.getBoundingClientRect();
+    const ghost = document.createElement('div');
+    ghost.className = 'ghost';
+    ghost.textContent = S.tiles[i].e;
+    ghost.style.cssText = 'left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px;--gs:' + r.width + 'px';
+    document.body.appendChild(ghost);
+    el.classList.add('taken');
+    const tx = (tr.left + tr.width / 2) - (r.left + r.width / 2);
+    const ty = (tr.top + tr.height / 2) - (r.top + r.height / 2);
+    const sc = Math.max(0.2, 30 / r.width);
+    let finished = false;
+    const finish = () => { if (finished) return; finished = true; ghost.remove(); if (--left === 0) cb(); };
+    try {
+      const anim = ghost.animate([
+        { transform: 'translate(0,0) scale(1.1)', opacity: 1, offset: 0 },
+        { transform: 'translate(' + (tx * 0.5) + 'px,' + (ty * 0.5 - 50) + 'px) scale(0.9)', opacity: 1, offset: 0.55 },
+        { transform: 'translate(' + tx + 'px,' + ty + 'px) scale(' + sc + ')', opacity: 0.6, offset: 1 }
+      ], { duration: 650, delay: k * 110, easing: 'cubic-bezier(.3,.6,.3,1)', fill: 'forwards' });
+      anim.onfinish = finish;
+      window.setTimeout(finish, 1300);
+    } catch (e) { finish(); }
+  });
+}
+
+function nextPlayer() {
+  S.cur = (S.cur + 1) % S.players.length;
+  S.turns++;
+  updatePlayers(false);
+  setStatus('Đến lượt ' + cur().name + '. Lật quân thứ nhất.');
+}
+
+function endGame() {
+  S.phase = 'end'; S.lock = false;
+  store.del(LS_GAME);
+  updatePlayers(false);
+  setStatus('Hết bàn cờ!');
+  Sound.win();
+  showResult(true);
+}
+
+function showResult(celebrate) {
+  const ranked = S.players.map((p, i) => ({ p, i })).sort((x, y) => y.p.pairs.length - x.p.pairs.length);
+  const top = ranked[0].p.pairs.length;
+  const winners = ranked.filter(r => r.p.pairs.length === top);
+  const h = $('#result-title'), sub = $('#result-sub');
+  if (winners.length === 1) {
+    h.textContent = '🏆 ' + winners[0].p.name + ' thắng!';
+    sub.textContent = 'Ăn được ' + top + ' trên ' + (S.tiles.length / 2) + ' cặp của bàn cờ.';
+  } else {
+    h.textContent = 'Hòa nhau!';
+    sub.textContent = winners.map(w => w.p.name).join(' và ') + ' cùng ăn được ' + top + ' cặp.';
+  }
+  const list = $('#rank'); list.innerHTML = '';
+  const medals = ['🥇', '🥈', '🥉', '4'];
+  ranked.forEach(r => {
+    const rank = ranked.findIndex(o => o.p.pairs.length === r.p.pairs.length);
+    const li = document.createElement('li');
+    if (r.p.pairs.length === top) li.classList.add('win');
+    li.innerHTML = '<span class="medal"></span><span class="pawn"></span><span class="r-name"></span><span class="r-score"><b></b> cặp</span>';
+    li.querySelector('.medal').textContent = medals[rank] || String(rank + 1);
+    const pawn = li.querySelector('.pawn'); pawn.textContent = String(r.i + 1); pawn.style.setProperty('--pc', r.p.color);
+    li.querySelector('.r-name').textContent = r.p.name;
+    li.querySelector('.r-score b').textContent = r.p.pairs.length;
+    list.appendChild(li);
+  });
+  $('#result').hidden = false;
+  if (celebrate) confetti();
+  window.setTimeout(() => { const b = $('#btn-again'); if (b) b.focus(); }, 50);
+}
+
+function confetti() {
+  if (reduceMotion()) return;
+  const cv = $('#confetti');
+  const ctx = cv.getContext && cv.getContext('2d');
+  if (!ctx) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = cv.width = Math.floor(window.innerWidth * dpr), H = cv.height = Math.floor(window.innerHeight * dpr);
+  cv.hidden = false;
+  const cols = COLORS.concat(['#f5cf3c', '#ffe978', '#5cb85a', '#fff6dc', '#d8322b']);
+  const parts = Array.from({ length: 150 }, () => ({
+    x: Math.random() * W, y: -Math.random() * H * 0.4,
+    vx: (Math.random() - .5) * 2.2 * dpr, vy: (2 + Math.random() * 3) * dpr,
+    s: (5 + Math.random() * 6) * dpr, c: cols[Math.floor(Math.random() * cols.length)],
+    r: Math.random() * Math.PI, vr: (Math.random() - .5) * .25
+  }));
+  const t0 = performance.now();
+  const frame = now => {
+    const el = now - t0;
+    ctx.clearRect(0, 0, W, H);
+    const fade = Math.max(0, 1 - Math.max(0, el - 2300) / 900);
+    parts.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.035 * dpr; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.globalAlpha = fade; ctx.fillStyle = p.c;
+      ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); ctx.restore();
+    });
+    if (el < 3200) requestAnimationFrame(frame); else { ctx.clearRect(0, 0, W, H); cv.hidden = true; }
+  };
+  requestAnimationFrame(frame);
+}
+
+/* ---------- điều hướng ---------- */
+function goSetup() {
+  S = null;
+  $('#game').hidden = true; $('#result').hidden = true; $('#confirm').hidden = true;
+  $('#btn-restart').hidden = true; $('#btn-setup').hidden = true;
+  $('#setup').hidden = false;
+  syncSetupUI();
+}
+function askConfirm(text, fn) {
+  pendingConfirm = fn;
+  $('#confirm-text').textContent = text;
+  $('#confirm').hidden = false;
+  $('#confirm-yes').focus();
+}
+function closeConfirm() { pendingConfirm = null; $('#confirm').hidden = true; }
+const inProgress = () => S && S.phase === 'play' && S.players.some(p => p.flips > 0);
+
+function bindUI() {
+  $$('input[name="count"]').forEach(r => r.addEventListener('change', () => { readSetupUI(); syncNames(); }));
+  $$('input[name="size"], input[name="set"], #rule-cont').forEach(el => el.addEventListener('change', readSetupUI));
+  [1, 2, 3, 4].forEach(i => {
+    const inp = $('#name-' + i);
+    inp.addEventListener('input', readSetupUI);
+    inp.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const next = $('#name-' + (i + 1));
+      if (next && i < settings.count) next.focus(); else $('#btn-start').click();
+    });
+  });
+  $('#btn-start').addEventListener('click', () => { readSetupUI(); Sound.ensure(); newGame(0); });
+  $('#btn-continue').addEventListener('click', () => {
+    const g = store.get(LS_GAME);
+    try {
+      S = normalize(g); renderGame(); setStatus(S.msg || ('Đến lượt ' + cur().name + '. Lật quân thứ nhất.'));
+    } catch (e) { S = null; store.del(LS_GAME); $('#btn-continue').hidden = true; }
+  });
+  $('#board').addEventListener('click', e => {
+    const b = e.target.closest('.tile');
+    if (b && b.dataset.i != null) onTile(Number(b.dataset.i));
+  });
+  $('#btn-sound').addEventListener('click', () => {
+    settings.sound = !settings.sound; store.set(LS_SET, settings); updateSoundBtn();
+    if (settings.sound) Sound.flip();
+  });
+  $('#btn-restart').addEventListener('click', () => {
+    const again = () => newGame(S ? S.start + 1 : 0);
+    if (inProgress()) askConfirm('Xáo lại bàn cờ và chơi ván mới với những người chơi này?', again); else again();
+  });
+  $('#btn-setup').addEventListener('click', () => {
+    if (inProgress()) askConfirm('Bỏ ván đang chơi và quay về màn hình chọn người chơi?', goSetup); else goSetup();
+  });
+  $('#confirm-yes').addEventListener('click', () => { const f = pendingConfirm; closeConfirm(); if (f) f(); });
+  $('#confirm-no').addEventListener('click', closeConfirm);
+  $('#btn-again').addEventListener('click', () => newGame(S ? S.start + 1 : 0));
+  $('#btn-change').addEventListener('click', goSetup);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#confirm').hidden) closeConfirm(); });
+  if (typeof ResizeObserver === 'function') new ResizeObserver(() => sizeBoard()).observe($('#board-wrap'));
+  else window.addEventListener('resize', sizeBoard);
+}
+
+/* ---------- khởi động (giữ ván đang chơi khi trang được cập nhật) ---------- */
+function snapshot() { return { S, settings }; }
+function start(data) {
+  loadSettings();
+  if (data && data.settings) { settings = Object.assign(defaults(), data.settings); }
+  bindUI();
+  syncSetupUI();
+  let restored = false;
+  if (data && data.S) {
+    try {
+      S = normalize(data.S);
+      renderGame();
+      if (S.phase === 'end') { setStatus('Hết bàn cờ!'); showResult(false); }
+      else setStatus(S.msg || ('Đến lượt ' + cur().name + '. Lật quân thứ nhất.'));
+      restored = true;
+    } catch (e) { S = null; }
+  }
+  if (!restored) goSetup();
+  try { if (window.claude && window.claude.hot && typeof window.claude.hot.snapshot === 'function') window.claude.hot.snapshot(snapshot); } catch (e) {}
+}
+try {
+  const hot = window.claude && window.claude.hot;
+  if (hot && typeof hot.ready === 'function') hot.ready(start); else start((hot && hot.data) || {});
+} catch (e) { start({}); }
+})();
+</script>
+<!-- ARTIFACT-END -->
+</body>
+</html>
